@@ -1,0 +1,10 @@
+# Ignore dashboard node_modules - Forge builds these separately
+static/dashboard/node_modules
+
+# Development files
+*.log
+.DS_Store
+.env
+.env.local
+*.md
+!resources/**/*.md

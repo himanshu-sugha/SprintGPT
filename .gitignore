@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+static/dashboard/node_modules/
+
+# Build output
+static/dashboard/build/
+
+# Environment files
+.env
+.env.local
+
+# Forge
+.forge/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# README (will be updated later)
+README.md

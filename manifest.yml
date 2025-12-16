@@ -1,0 +1,164 @@
+app:
+  id: ari:cloud:ecosystem::app/045c5e5c-6494-448c-a173-f08478bc6e01
+  runtime:
+    name: nodejs22.x
+
+modules:
+  # ROVO AGENT - Core AI feature
+  rovo:agent:
+    - key: sprint-engineer
+      name: Sprint Engineer
+      description: Your AI co-pilot for sprint analysis and retrospectives. Analyzes
+        sprint data, identifies patterns, and helps teams run more effective
+        retros.
+      prompt: resources/prompts/sprint-engineer.md
+      conversationStarters:
+        - "Analyze our last sprint's performance"
+        - "Why did we miss our sprint goal?"
+        - "What are our recurring blockers?"
+        - "Generate retro talking points for today"
+        - "Compare this sprint to our best sprint"
+      actions:
+        - analyze-current-sprint
+        - compare-two-sprints
+        - identify-patterns
+        - generate-retro-report
+        - create-action-item
+
+  # ROVO ACTIONS - Agent capabilities
+  action:
+    - key: analyze-current-sprint
+      name: Analyze Sprint
+      actionVerb: GET
+      description: Get comprehensive analysis of the current or specified sprint
+        metrics including velocity, completion rate, and bottlenecks.
+      function: analyzeSprintHandler
+      inputs:
+        sprintId:
+          type: string
+          title: Sprint ID
+          description: The ID of the sprint to analyze. Leave empty for current sprint.
+          required: false
+
+    - key: compare-two-sprints
+      name: Compare Sprints
+      actionVerb: GET
+      description: Compare metrics between two sprints to identify improvements or
+        regressions.
+      function: compareSprintsHandler
+      inputs:
+        firstSprint:
+          type: string
+          title: First Sprint ID
+          description: The ID of the first sprint to compare.
+          required: true
+        secondSprint:
+          type: string
+          title: Second Sprint ID
+          description: The ID of the second sprint to compare.
+          required: true
+
+    - key: identify-patterns
+      name: Identify Patterns
+      actionVerb: GET
+      description: Analyze historical sprint data to identify recurring patterns and issues.
+      function: identifyPatternsHandler
+      inputs:
+        sprintCount:
+          type: number
+          title: Number of sprints
+          description: How many past sprints to analyze for patterns.
+          required: false
+
+    - key: generate-retro-report
+      name: Generate Retro Report
+      actionVerb: CREATE
+      description: Create a comprehensive retrospective report for the specified sprint.
+      function: generateRetroHandler
+      inputs:
+        sprintId:
+          type: string
+          title: Sprint ID
+          description: The ID of the sprint to generate a report for.
+          required: false
+
+    - key: create-action-item
+      name: Create Action Item
+      actionVerb: CREATE
+      description: Create a Jira issue to track a retrospective action item.
+      function: createActionHandler
+      inputs:
+        title:
+          type: string
+          title: Title
+          description: The title of the action item.
+          required: true
+        description:
+          type: string
+          title: Description
+          description: Detailed description of the action item.
+          required: false
+        priority:
+          type: string
+          title: Priority
+          description: Priority level (High, Medium, Low).
+          required: false
+
+  # JIRA UI - Dashboard panel (Custom UI)
+  jira:projectPage:
+    - key: sprint-intelligence-dashboard
+      title: Sprint Intelligence
+      resource: dashboard-ui
+      resolver:
+        function: dashboardHandler
+
+  # CONFLUENCE - Report action
+  confluence:contentAction:
+    - key: insert-sprint-report
+      title: Insert Sprint Retro Report
+      function: insertReportHandler
+
+  # AUTOMATION - Sprint completion trigger
+  trigger:
+    - key: sprint-complete-trigger
+      function: onSprintCompleteHandler
+      events:
+        - avi:jira:sprint:completed
+
+  function:
+    - key: analyzeSprintHandler
+      handler: index.analyzeSprintHandler
+    - key: compareSprintsHandler
+      handler: index.compareSprintsHandler
+    - key: identifyPatternsHandler
+      handler: index.identifyPatternsHandler
+    - key: generateRetroHandler
+      handler: index.generateRetroHandler
+    - key: createActionHandler
+      handler: index.createActionHandler
+    - key: dashboardHandler
+      handler: index.dashboardHandler
+    - key: insertReportHandler
+      handler: index.insertReportHandler
+    - key: onSprintCompleteHandler
+      handler: index.onSprintCompleteHandler
+
+resources:
+  - key: dashboard-ui
+    path: static/dashboard/build
+  - key: prompts
+    path: resources/prompts
+
+permissions:
+  scopes:
+    - write:page:confluence
+    - write:jira-work
+    - read:issue-details:jira
+    - read:jql:jira
+    - read:board-scope:jira-software
+    - read:project:jira
+    - read:board-scope.admin:jira-software
+    - read:sprint:jira-software
+    - write:issue:jira
+    - manage:jira-project
+    - storage:app
