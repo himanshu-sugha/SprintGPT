@@ -164,6 +164,17 @@ Our health score uses a weighted calculation:
 
 ## 10. Quick Start
 
+### Option 1: One-Click Install (For Judges)
+
+👉 **[Install SprintGPT](https://developer.atlassian.com/console/install/045c5e5c-6494-448c-a173-f08478bc6e01?signature=AYABeCXtv04bfvlNCh4Adxv%2FWe0AAAADAAdhd3Mta21zAEthcm46YXdzOmttczp1cy13ZXN0LTI6NzA5NTg3ODM1MjQzOmtleS83MDVlZDY3MC1mNTdjLTQxYjUtOWY5Yi1lM2YyZGNjMTQ2ZTcAuAECAQB4IOp8r3eKNYw8z2v%2FEq3%2FfvrZguoGsXpNSaDveR%2FF%2Fo0BucuD1HM8bYdKbOqh7LgGfwAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDCirZDVTmcBClMq3JQIBEIA7fcEvgW7DnJechDF1TCnZj0B6HAQvI2fETC8rd6Jkt8%2B1usa%2BznegEZn1Skr37hMfD9VofAei6WJzwDgAB2F3cy1rbXMAS2Fybjphd3M6a21zOmV1LXdlc3QtMTo3MDk1ODc4MzUyNDM6a2V5LzQ2MzBjZTZiLTAwYzMtNGRlMi04NzdiLTYyN2UyMDYwZTVjYwC4AQICAHijmwVTMt6Oj3F%2B0%2B0cVrojrS8yZ9ktpdfDxqPMSIkvHAFH1OrkDNEwvhDr1XNUBCC0AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMM1LKYcvWGBLueS%2F9AgEQgDsnFUbLH3Kap%2FsGtJIz9i6E%2B0liR%2FpVNiaq2i%2BgWwCJfmtva9xohXD9LUVFjaERlkVmuVpKQcxBs%2FrbDAAHYXdzLWttcwBLYXJuOmF3czprbXM6dXMtZWFzdC0xOjcwOTU4NzgzNTI0MzprZXkvNmMxMjBiYTAtNGNkNS00OTg1LWI4MmUtNDBhMDQ5NTJjYzU3ALgBAgIAeLKa7Dfn9BgbXaQmJGrkKztjV4vrreTkqr7wGwhqIYs5AYfSoRCpuH8bChlPjWKo91EAAAB%2BMHwGCSqGSIb3DQEHBqBvMG0CAQAwaAYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAwfuzrq66phXsULo88CARCAO%2BCSMHJL%2BoGaqkboLamQP0fJ1f2Fru2IfJDYqUY9inXilO3zdnbcFe%2B7YOHMjenyD8X2WcKePEf5%2FYhIAgAAAAAMAAAQAAAAAAAAAAAAAAAAAAP%2BU47ZImNbWkN%2FDmEcHTj%2F%2F%2F%2F%2FAAAAAQAAAAAAAAAAAAAAAQAAADKea8efSCzy3UlZzzFnkAHcYYk7imvxEr5vyBb8XcPVjr2sDc10q54c8t8FEymK4j3uxR%2B%2FrdBsMSntUJsRt3TsQWI%3D&product=confluence&product=jira)**
+
+1. Click the link above
+2. Select your Atlassian site
+3. Click "Get app"
+4. Go to: Jira Project → Apps → Sprint Intelligence
+
+### Option 2: Clone & Deploy (For Developers)
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/himanshu-sugha/SprintGPT
@@ -184,6 +195,9 @@ forge deploy
 
 # 6. Install on your Jira site
 forge install
+
+# 7. Open the app
+# Go to: Jira Project → Apps → Sprint Intelligence
 ```
 
 ### Prerequisites
