@@ -25,14 +25,50 @@ function calculateSprintMetrics(issues, sprint) {
     // Calculate total story points (try multiple common field names)
     const totalPoints = safeIssues.reduce((sum, issue) => {
         if (!issue || !issue.fields) return sum;
-        // Try common story points field names
-        const points = issue.fields.customfield_10016 ||  // Most common
-            issue.fields.customfield_10026 ||  // Alternative
-            issue.fields.storyPoints ||        // Some configs
-            issue.fields['Story Points'] ||    // Display name
-            0;
-        return sum + (typeof points === 'number' ? points : 0);
+
+        // Helper to extract number from various formats
+        const extractPoints = (val) => {
+            if (typeof val === 'number') return val;
+            if (typeof val === 'string' && !isNaN(parseFloat(val))) return parseFloat(val);
+            if (val && typeof val === 'object' && typeof val.value === 'number') return val.value;
+            return null; // Return null for invalid values
+        };
+
+        // List of fields to try in order - customfield_10016 is most common for Jira Cloud
+        const storyPointFields = [
+            'customfield_10016',  // Most common Jira Cloud
+            'customfield_10034',  // Story point estimate (newer)
+            'customfield_10019',  // Story point estimate
+            'customfield_10026',  // Alternative
+            'customfield_10028',  // Another variant
+        ];
+
+        // Find the first field with a valid numeric value
+        let points = 0;
+        for (const fieldName of storyPointFields) {
+            const fieldValue = issue.fields[fieldName];
+            const extracted = extractPoints(fieldValue);
+            if (extracted !== null && extracted > 0) {
+                points = extracted;
+                console.log(`Issue ${issue.key}: found ${points} points in ${fieldName}`);
+                break;
+            }
+        }
+
+        if (points === 0) {
+            console.log(`Issue ${issue.key}: no story points found in any field`);
+        }
+
+        return sum + points;
     }, 0);
+    console.log('Total story points:', totalPoints);
+
+    // Log all issue statuses for debugging
+    console.log('All issue statuses:', safeIssues.map(i => ({
+        key: i.key,
+        status: i.fields?.status?.name,
+        statusCategory: i.fields?.status?.statusCategory?.key
+    })));
 
     // Completed issues - check status category OR status name
     const completedIssues = safeIssues.filter(issue => {
@@ -44,14 +80,41 @@ function calculateSprintMetrics(issues, sprint) {
             statusName === 'closed' ||
             statusName === 'resolved';
     });
+    console.log('Completed issues count:', completedIssues.length, completedIssues.map(i => i.key));
 
     const completedPoints = completedIssues.reduce((sum, issue) => {
         if (!issue || !issue.fields) return sum;
-        const points = issue.fields.customfield_10016 ||
-            issue.fields.customfield_10026 ||
-            0;
-        return sum + (typeof points === 'number' ? points : 0);
+
+        // Helper to extract number from various formats
+        const extractPoints = (val) => {
+            if (typeof val === 'number') return val;
+            if (typeof val === 'string' && !isNaN(parseFloat(val))) return parseFloat(val);
+            if (val && typeof val === 'object' && typeof val.value === 'number') return val.value;
+            return null;
+        };
+
+        // Same fields as totalPoints
+        const storyPointFields = [
+            'customfield_10016',  // Most common Jira Cloud
+            'customfield_10034',  // Story point estimate (newer)
+            'customfield_10019',  // Story point estimate
+            'customfield_10026',  // Alternative
+            'customfield_10028',  // Another variant
+        ];
+
+        let points = 0;
+        for (const fieldName of storyPointFields) {
+            const fieldValue = issue.fields[fieldName];
+            const extracted = extractPoints(fieldValue);
+            if (extracted !== null && extracted > 0) {
+                points = extracted;
+                break;
+            }
+        }
+        console.log(`Completed issue ${issue.key}: ${points} points`);
+        return sum + points;
     }, 0);
+    console.log('Total completed points (velocity):', completedPoints);
 
     // In progress issues
     const inProgressIssues = safeIssues.filter(issue => {
@@ -63,13 +126,24 @@ function calculateSprintMetrics(issues, sprint) {
             statusName.includes('review');
     });
 
-    // Blocked issues - check labels and status name
+    // Blocked issues - check flagged field, labels, and status name
     const blockedIssues = safeIssues.filter(issue => {
         if (!issue || !issue.fields) return false;
+
+        // Check Jira's native flagged field (impediment flag)
+        const isFlagged = issue.fields.flagged === true ||
+            issue.fields.customfield_10021 === 'Impediment' ||
+            (Array.isArray(issue.fields.customfield_10021) && issue.fields.customfield_10021.some(f => f?.value === 'Impediment'));
+
+        // Check labels for blocked
         const labels = issue.fields.labels || [];
+        const hasBlockedLabel = Array.isArray(labels) && labels.some(l => l.toLowerCase().includes('block'));
+
+        // Check status name for blocked
         const statusName = issue.fields.status?.name?.toLowerCase() || '';
-        return (Array.isArray(labels) && labels.some(l => l.toLowerCase().includes('block'))) ||
-            statusName.includes('block');
+        const hasBlockedStatus = statusName.includes('block');
+
+        return isFlagged || hasBlockedLabel || hasBlockedStatus;
     });
 
     // Calculate cycle times safely
@@ -90,6 +164,18 @@ function calculateSprintMetrics(issues, sprint) {
         ? cycleTimes.reduce((a, b) => a + b, 0) / cycleTimes.length
         : 0;
 
+    // Calculate health score based on completion rate and blockers
+    const completionScore = safeIssues.length > 0
+        ? (completedIssues.length / safeIssues.length) * 100
+        : 0;
+    const blockerPenalty = blockedIssues.length * 10; // -10 points per blocker
+    const velocityBonus = completedPoints > 30 ? 10 : (completedPoints > 15 ? 5 : 0);
+    const healthScore = Math.min(100, Math.max(0, Math.round(
+        (completionScore * 0.6) + // 60% weight on completion
+        (40 - blockerPenalty) +   // 40% base minus blocker penalty
+        velocityBonus             // Bonus for good velocity
+    )));
+
     return {
         sprintId: sprint?.id || 'unknown',
         sprintName: sprint?.name || 'Unknown Sprint',
@@ -103,7 +189,8 @@ function calculateSprintMetrics(issues, sprint) {
         velocity: completedPoints,
         avgCycleTime: avgCycleTime.toFixed(1),
         spilloverIssues: safeIssues.length - completedIssues.length,
-        spilloverPoints: totalPoints - completedPoints
+        spilloverPoints: totalPoints - completedPoints,
+        healthScore
     };
 }
 
@@ -347,34 +434,84 @@ exports.compareSprintsHandler = async function (context) {
 };
 
 /**
- * Identify Patterns Handler
+ * Identify Patterns Handler - Uses REAL stored sprint data
  */
 exports.identifyPatternsHandler = async function (context) {
     try {
-        const patterns = [
-            {
-                type: 'info',
-                category: 'velocity',
-                title: 'Velocity Stable',
-                description: 'Your team velocity has remained consistent over recent sprints.',
-                confidence: 'medium'
-            },
-            {
+        // Fetch all stored sprint metrics
+        const allKeys = ['sprint-metrics-demo-sprint'];
+        let storedSprints = [];
+
+        // Try to get sprint metrics from recent sprints
+        for (let i = 1; i <= 10; i++) {
+            try {
+                const sprintKey = `sprint-metrics-sprint-${i}`;
+                const metrics = await storage.get(sprintKey);
+                if (metrics) storedSprints.push(metrics);
+            } catch (e) { }
+        }
+
+        // Also try common patterns
+        const demoMetrics = await storage.get('sprint-metrics-demo-sprint');
+        if (demoMetrics) storedSprints.push(demoMetrics);
+
+        // Calculate real patterns from data
+        const patterns = [];
+        let totalVelocity = 0;
+        let totalCompletion = 0;
+        let totalCycleTime = 0;
+
+        if (storedSprints.length > 0) {
+            storedSprints.forEach(s => {
+                totalVelocity += s.velocity || 0;
+                totalCompletion += parseFloat(s.completionRate) || 0;
+                totalCycleTime += parseFloat(s.avgCycleTime) || 0;
+            });
+
+            const avgVelocity = Math.round(totalVelocity / storedSprints.length);
+            const avgCompletion = (totalCompletion / storedSprints.length).toFixed(1);
+            const avgCycleTime = (totalCycleTime / storedSprints.length).toFixed(1);
+
+            patterns.push({
                 type: 'stats',
                 category: 'summary',
                 title: 'Sprint Averages',
-                description: 'Velocity: 38 pts | Completion: 80% | Cycle Time: 3.2 days',
+                description: `Velocity: ${avgVelocity} pts | Completion: ${avgCompletion}% | Cycle Time: ${avgCycleTime} days`,
                 confidence: 'high'
+            });
+
+            // Velocity trend analysis
+            if (storedSprints.length >= 2) {
+                const firstHalf = storedSprints.slice(0, Math.floor(storedSprints.length / 2));
+                const secondHalf = storedSprints.slice(Math.floor(storedSprints.length / 2));
+                const firstAvg = firstHalf.reduce((s, sp) => s + (sp.velocity || 0), 0) / firstHalf.length;
+                const secondAvg = secondHalf.reduce((s, sp) => s + (sp.velocity || 0), 0) / secondHalf.length;
+
+                if (secondAvg > firstAvg * 1.1) {
+                    patterns.push({ type: 'success', category: 'velocity', title: 'Velocity Improving', description: 'Your team velocity is trending upward!', confidence: 'high' });
+                } else if (secondAvg < firstAvg * 0.9) {
+                    patterns.push({ type: 'warning', category: 'velocity', title: 'Velocity Declining', description: 'Velocity has decreased recently. Consider reviewing blockers.', confidence: 'medium' });
+                } else {
+                    patterns.push({ type: 'info', category: 'velocity', title: 'Velocity Stable', description: 'Your team velocity has remained consistent.', confidence: 'medium' });
+                }
             }
-        ];
+        } else {
+            patterns.push({
+                type: 'info',
+                category: 'data',
+                title: 'Analyze More Sprints',
+                description: 'Run "Analyze Current Sprint" to build pattern history.',
+                confidence: 'low'
+            });
+        }
 
         return {
             success: true,
-            sprintsAnalyzed: 3,
+            sprintsAnalyzed: storedSprints.length,
             patterns,
-            recommendations: [
-                { priority: 'medium', action: 'Continue current practices', relatedPattern: 'Velocity Stable' }
-            ]
+            recommendations: patterns.length > 0 ? [
+                { priority: 'medium', action: 'Continue tracking sprint metrics', relatedPattern: patterns[0]?.title }
+            ] : []
         };
     } catch (error) {
         return { success: false, message: error.message };
@@ -382,26 +519,85 @@ exports.identifyPatternsHandler = async function (context) {
 };
 
 /**
- * Generate Retro Report Handler
+ * Generate Retro Report Handler - Uses REAL stored sprint data
  */
 exports.generateRetroHandler = async function (context) {
     try {
+        const { sprintId } = context.payload || {};
+
+        // Try to get the most recent analyzed sprint
+        let metrics = null;
+        if (sprintId) {
+            metrics = await storage.get(`sprint-metrics-${sprintId}`);
+        }
+        if (!metrics) {
+            metrics = await storage.get('sprint-metrics-demo-sprint');
+        }
+
+        // If no stored data, use minimal placeholder
+        if (!metrics) {
+            metrics = {
+                sprintName: 'Current Sprint',
+                velocity: 0,
+                completionRate: '0',
+                avgCycleTime: '0',
+                blockedIssues: 0,
+                healthScore: 50
+            };
+        }
+
+        // Generate dynamic summary based on actual metrics
+        let summary = 'Sprint retrospective analysis.';
+        const healthScore = metrics.healthScore || 50;
+        if (healthScore >= 80) {
+            summary = 'Excellent sprint! The team performed above expectations.';
+        } else if (healthScore >= 60) {
+            summary = 'Good sprint with room for improvement. Review insights for optimization opportunities.';
+        } else {
+            summary = 'Challenging sprint. Focus on blockers and scope management in the next sprint.';
+        }
+
+        // Dynamic what went well / could improve based on metrics
+        const whatWentWell = [];
+        const whatCouldImprove = [];
+
+        if (parseFloat(metrics.completionRate) >= 70) {
+            whatWentWell.push(`Strong completion rate (${metrics.completionRate}%)`);
+        } else {
+            whatCouldImprove.push(`Improve completion rate (currently ${metrics.completionRate}%)`);
+        }
+
+        if (parseFloat(metrics.avgCycleTime) <= 3) {
+            whatWentWell.push(`Fast cycle time (${metrics.avgCycleTime} days)`);
+        } else {
+            whatCouldImprove.push(`Reduce cycle time (currently ${metrics.avgCycleTime} days)`);
+        }
+
+        if ((metrics.blockedIssues || 0) === 0) {
+            whatWentWell.push('No blocked issues during sprint');
+        } else {
+            whatCouldImprove.push(`Address blocked issues earlier (${metrics.blockedIssues} blockers this sprint)`);
+        }
+
         const report = {
-            title: '🏎️ Sprint Retrospective Report',
+            title: `🏎️ Sprint Retrospective: ${metrics.sprintName || 'Sprint'}`,
             generatedAt: new Date().toISOString(),
-            summary: 'Good sprint with room for improvement. Review insights for optimization opportunities.',
+            isRealData: metrics.isRealData || false,
+            summary,
             dataHighlights: {
-                velocity: { value: 38, label: 'Story Points', status: 'good' },
-                completionRate: { value: '80%', label: 'Completion Rate', status: 'good' },
-                cycleTime: { value: '3.2d', label: 'Cycle Time', status: 'good' }
+                velocity: { value: metrics.velocity || 0, label: 'Story Points', status: metrics.velocity > 30 ? 'good' : 'neutral' },
+                completionRate: { value: `${metrics.completionRate}%`, label: 'Completion Rate', status: parseFloat(metrics.completionRate) >= 70 ? 'good' : 'warning' },
+                cycleTime: { value: `${metrics.avgCycleTime}d`, label: 'Cycle Time', status: parseFloat(metrics.avgCycleTime) <= 3 ? 'good' : 'warning' },
+                healthScore: { value: healthScore, label: 'Health Score', status: healthScore >= 70 ? 'good' : 'warning' }
             },
             discussionTopics: [
-                { title: 'Sprint Velocity', question: 'How did the velocity feel this sprint?' }
+                { title: 'Sprint Velocity', question: `We delivered ${metrics.velocity} points this sprint. How did the workload feel?` },
+                { title: 'Blockers', question: `We had ${metrics.blockedIssues || 0} blocked issues. What caused them and how can we prevent them?` }
             ],
             retroQuestions: {
-                whatWentWell: ['High completion rate', 'Fast cycle time'],
-                whatCouldImprove: ['Reduce blocked items'],
-                actionItems: [{ title: 'Review blockers earlier', priority: 'medium' }]
+                whatWentWell,
+                whatCouldImprove,
+                actionItems: whatCouldImprove.map((item, i) => ({ title: item, priority: i === 0 ? 'high' : 'medium' }))
             }
         };
 
@@ -623,8 +819,20 @@ resolver.define('getDashboardData', async (req) => {
                         const sprintsData = await sprintsResponse.json();
 
                         if (sprintsData.values && sprintsData.values.length > 0) {
-                            // Process each sprint
-                            for (const sprint of sprintsData.values.slice(0, 3)) {
+                            // Sort sprints: active first, then by ID (newer first)
+                            const sortedSprints = [...sprintsData.values].sort((a, b) => {
+                                // Active sprints first
+                                if (a.state === 'active' && b.state !== 'active') return -1;
+                                if (b.state === 'active' && a.state !== 'active') return 1;
+                                // Then by ID (higher = newer)
+                                return (b.id || 0) - (a.id || 0);
+                            });
+
+                            console.log('Sprints order:', sortedSprints.map(s => `${s.name}(${s.state})`).join(', '));
+
+                            // Process each sprint (up to 3)
+                            for (const sprint of sortedSprints.slice(0, 3)) {
+                                console.log(`Processing sprint: ${sprint.name} (${sprint.state})`);
                                 const issuesResponse = await api.asUser().requestJira(
                                     route`/rest/agile/1.0/sprint/${sprint.id}/issue?maxResults=100`,
                                     { headers: { 'Accept': 'application/json' } }
@@ -641,9 +849,11 @@ resolver.define('getDashboardData', async (req) => {
 
                                     const sprintData = { ...metrics, healthScore };
 
+                                    // Use the FIRST sprint (which is now the active one after sorting)
                                     if (!sprintMetrics) {
                                         sprintMetrics = sprintData;
                                         sprintMetrics.insights = generateInsights(metrics, healthScore);
+                                        console.log(`Using sprint ${sprint.name} as primary with velocity ${sprintData.velocity}`);
                                     }
                                     sprintHistory.push(sprintData);
                                 }
