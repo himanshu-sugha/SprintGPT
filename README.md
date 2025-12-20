@@ -171,7 +171,9 @@ Our health score uses a weighted calculation:
 1. Click the link above
 2. Select your Atlassian site
 3. Click "Get app"
-4. Go to: Jira Project → Apps → Sprint Intelligence
+4. Go to: **Jira Project → Apps → Sprint Intelligence**
+5. To use Rovo: **Open Rovo Chat → Select "Sprint Engineer"**
+6. To use Confluence: **Open any Page → Actions (...) → Insert Sprint Retro Report**
 
 ### Option 2: Clone & Deploy (For Developers)
 
@@ -197,7 +199,9 @@ forge deploy
 forge install
 
 # 7. Open the app
-# Go to: Jira Project → Apps → Sprint Intelligence
+# Go to: **Jira Project → Apps → Sprint Intelligence**
+# To use Rovo: **Open Rovo Chat → Select "Sprint Engineer"**
+# To use Confluence: **Open any Page → Actions (...) → Insert Sprint Retro Report**
 ```
 
 ### Prerequisites

@@ -112,11 +112,14 @@ modules:
       resolver:
         function: dashboardHandler
 
-  # CONFLUENCE - Report action
+  # CONFLUENCE - Report action (UI Kit 2)
   confluence:contentAction:
     - key: insert-sprint-report
       title: Insert Sprint Retro Report
-      function: insertReportHandler
+      resource: confluence-action-ui
+      render: native
+      resolver:
+        function: insertReportHandler
 
   # AUTOMATION - Sprint completion trigger
   trigger:
@@ -146,11 +149,14 @@ modules:
 resources:
   - key: dashboard-ui
     path: static/dashboard/build
+  - key: confluence-action-ui
+    path: src/frontend/confluence-action.jsx
   - key: prompts
     path: resources/prompts
 
 permissions:
   scopes:
+    - read:page:confluence
     - write:page:confluence
     - write:jira-work
     - read:issue-details:jira
