@@ -8,16 +8,6 @@
 
 ---
 
-## Screenshots
-
-### Sprint Intelligence Dashboard
-![Sprint Dashboard](static/dashboard_screenshot.png)
-
-### Confluence Report Generator
-![Confluence Report](static/confluence_screenshot.png)
-
----
-
 ## 1. What is SprintGPT?
 
 SprintGPT is an **AI-powered sprint retrospective engine** built on Atlassian Forge that:
@@ -29,7 +19,6 @@ SprintGPT is an **AI-powered sprint retrospective engine** built on Atlassian Fo
 5. **Automates triggers** on sprint completion
 
 ---
-
 
 ## 2. Problem Statement
 
@@ -64,7 +53,113 @@ Sprint retrospectives often fail to deliver value. Teams struggle with:
 
 ---
 
-## 4. How It Works (User Flow)
+## 4. AI Capabilities (Rovo Agent)
+
+### Meet "Sprint Engineer" 🏎️
+
+The **Sprint Engineer** is your AI co-pilot for sprint retrospectives. Think of it like an F1 race engineer analyzing telemetry data to help the team understand performance and improve.
+
+**Agent Persona:**
+- **Data-Driven:** Always backs up insights with specific metrics
+- **Constructive:** Focuses on improvements, not blame
+- **Actionable:** Every observation leads to a possible action
+- **F1-Themed:** Uses racing metaphors (pit stops, lap times, qualifying)
+
+### Available Actions
+
+| Action | Type | Purpose |
+|--------|------|---------|
+| `analyze-current-sprint` | GET | Full sprint metrics analysis |
+| `compare-two-sprints` | GET | Side-by-side sprint comparison |
+| `identify-patterns` | GET | Detect trends across history |
+| `generate-retro-report` | CREATE | Generate Confluence report |
+| `create-action-item` | CREATE | Create Jira issue from insight |
+
+### Conversation Starters
+- "Analyze our last sprint's performance"
+- "Why did we miss our sprint goal?"
+- "What are our recurring blockers?"
+- "Generate retro talking points for today"
+- "Compare this sprint to our best sprint"
+
+### Example Conversation
+
+**You:** "Why did our last sprint underperform?"
+
+**Sprint Engineer:**
+```
+🏎️ TELEMETRY SUMMARY: Sprint 42
+
+| Metric        | Value   | vs Average |
+|---------------|---------|------------|
+| 📈 Velocity   | 34 pts  | ↓ 23% below |
+| ✅ Completion | 71%     | ↓ from 85% |
+| ⏱️ Cycle Time | 4.2 days| ↑ slower   |
+| 🚧 Blockers   | 4       | ↑ 3 more   |
+
+💡 ENGINEER'S INSIGHT:
+Scope creep was the main factor - 8 stories added mid-sprint.
+Review bottleneck - 3 stories spent 5+ days in review.
+
+🏁 NEXT LAP RECOMMENDATION:
+1. Implement sprint scope lock after day 2
+2. Add daily review pairing slot
+
+Should I create action items for these?
+```
+
+### Technical Implementation
+
+```yaml
+# manifest.yml
+rovo:agent:
+  - key: sprint-engineer
+    name: Sprint Engineer
+    prompt: resources/prompts/sprint-engineer.md
+    actions:
+      - analyze-current-sprint
+      - compare-two-sprints
+      - identify-patterns
+      - generate-retro-report
+      - create-action-item
+```
+
+---
+
+## 5. Screenshots
+
+**Sprint Intelligence Dashboard:**
+![Sprint Dashboard](static/dashboard_screenshot.png)
+
+**Confluence Report Generator:**
+![Confluence Report](static/confluence_screenshot.png)
+
+---
+
+## 6. Sprint Health Algorithm
+
+Our health score uses a weighted calculation:
+
+### 6.1 Scoring Weights
+| Factor | Weight | How It's Scored |
+|--------|--------|-----------------|
+| Completion Rate | 40% | % of issues done vs total |
+| Blocked Issues | 25% | Penalty for blockers (0 = 100 pts) |
+| Velocity vs Target | 20% | Story points completed |
+| Cycle Time | 15% | Average days per issue |
+
+### 6.2 Health Score Ranges
+| Score | Rating | Color |
+|-------|--------|-------|
+| 80-100 | Excellent | 🟢 Green |
+| 60-79 | Good | 🟡 Orange |
+| 0-59 | Needs Attention | 🔴 Red |
+
+**Formula:** `Health = (CompletionRate × 0.4) + (100 - BlockerPenalty) × 0.25 + (VelocityScore × 0.2) + (CycleTimeScore × 0.15)`
+
+---
+
+## 7. How It Works (User Flow)
 
 ```
 +-------------------------------------------------------------+
@@ -84,62 +179,6 @@ Sprint retrospectives often fail to deliver value. Teams struggle with:
 |  --> Create Confluence retro report with one click          |
 +-------------------------------------------------------------+
 ```
-
----
-
-## 5. Sprint Health Algorithm
-
-Our health score uses a weighted calculation:
-
-### 5.1 Scoring Weights
-| Factor | Weight | How It's Scored |
-|--------|--------|-----------------|
-| Completion Rate | 40% | % of issues done vs total |
-| Blocked Issues | 25% | Penalty for blockers (0 = 100 pts) |
-| Velocity vs Target | 20% | Story points completed |
-| Cycle Time | 15% | Average days per issue |
-
-### 5.2 Health Score Ranges
-| Score | Rating | Color |
-|-------|--------|-------|
-| 80-100 | Excellent | 🟢 Green |
-| 60-79 | Good | 🟡 Orange |
-| 0-59 | Needs Attention | 🔴 Red |
-
-**Formula:** `Health = (CompletionRate × 0.4) + (100 - BlockerPenalty) × 0.25 + (VelocityScore × 0.2) + (CycleTimeScore × 0.15)`
-
----
-
-## 6. AI Capabilities (Rovo Agent)
-
-| Action | Type | Purpose |
-|--------|------|---------|
-| `analyze-current-sprint` | GET | Full sprint metrics analysis |
-| `compare-two-sprints` | GET | Side-by-side sprint comparison |
-| `identify-patterns` | GET | Detect trends across history |
-| `generate-retro-report` | CREATE | Generate Confluence report |
-| `create-action-item` | CREATE | Create Jira issue from insight |
-
-### Conversation Starters
-- "Analyze our last sprint's performance"
-- "Why did we miss our sprint goal?"
-- "What are our recurring blockers?"
-- "Generate retro talking points for today"
-- "Compare this sprint to our best sprint"
-
----
-
-## 7. Demo Data Support
-
-**The app works 100% even without sprint data.** Every feature has a fallback:
-
-| Scenario | Behavior |
-|----------|----------|
-| **Active sprint with issues** | Shows real metrics from Jira API |
-| **Empty project** | Shows demo data for full UI preview |
-| **Manual demo** | "Load Demo Data" button shows sample metrics |
-
-> **Core features work fully with or without active sprints.**
 
 ---
 
@@ -177,7 +216,21 @@ Our health score uses a weighted calculation:
 
 ---
 
-## 10. Quick Start
+## 10. Demo Data Support
+
+**The app works 100% even without sprint data.** Every feature has a fallback:
+
+| Scenario | Behavior |
+|----------|----------|
+| **Active sprint with issues** | Shows real metrics from Jira API |
+| **Empty project** | Shows demo data for full UI preview |
+| **Manual demo** | "Load Demo Data" button shows sample metrics |
+
+> **Core features work fully with or without active sprints.**
+
+---
+
+## 11. Quick Start
 
 ### Option 1: One-Click Install (For Judges)
 
@@ -227,7 +280,7 @@ forge install
 
 ---
 
-## 11. Project Structure
+## 12. Project Structure
 
 ```
 SprintGPT/
@@ -248,7 +301,7 @@ SprintGPT/
 
 ---
 
-## 12. Author
+## 13. Author
 
 **Himanshu Sugha**  
 Email: himanshusugha@gmail.com  
@@ -256,7 +309,7 @@ GitHub: [@himanshu-sugha](https://github.com/himanshu-sugha)
 
 ---
 
-## 13. License
+## 14. License
 
 MIT License - Built for Codegeist 2025
 
