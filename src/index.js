@@ -647,16 +647,25 @@ exports.createActionHandler = async function (context) {
 resolver.define('insertReportHandler', async (req) => {
     try {
         console.log('=== INSERT REPORT HANDLER (Resolver) ===');
-        const { payload, context } = req;
-        console.log('Payload keys:', Object.keys(payload || {}));
-        console.log('Context keys:', Object.keys(context || {}));
+        console.log('Full req object keys:', Object.keys(req || {}));
 
-        // Get content ID - priority from payload
-        // The frontend sends { contentId, debugContext } in payload
+        const { payload, context } = req;
+        console.log('Payload:', JSON.stringify(payload, null, 2));
+        console.log('Context:', JSON.stringify(context, null, 2));
+
+        // Get content ID - try ALL possible paths
         const contentId = payload?.contentId ||
-            context?.extension?.content?.id;
+            context?.extension?.content?.id ||
+            context?.content?.id ||
+            context?.contentId ||
+            req?.context?.extension?.content?.id ||
+            req?.payload?.contentId;
 
         console.log('Resolved contentId:', contentId);
+
+        if (!contentId) {
+            console.error('ERROR: No contentId found! Returning early with demo data.');
+        }
 
         // Get latest sprint metrics
         const metrics = await storage.get('sprint-metrics-demo-sprint') || {

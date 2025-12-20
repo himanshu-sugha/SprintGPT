@@ -2,6 +2,20 @@
 
 > Your AI-powered Sprint Engineer that analyzes sprint data like F1 telemetry. Built for Codegeist 2025: Atlassian Williams Racing Edition.
 
+**🏆 Prize Categories:**
+- **Apps for Software Teams** - Helps development teams operate like a pit crew with data-driven retrospectives
+- **Best Rovo Apps** - Uses `rovo:agent` and `action` modules to enable natural language sprint analysis
+
+---
+
+## Screenshots
+
+### Sprint Intelligence Dashboard
+![Sprint Dashboard](static/dashboard_screenshot.png)
+
+### Confluence Report Generator
+![Confluence Report](static/confluence_screenshot.png)
+
 ---
 
 ## 1. What is SprintGPT?
@@ -11,10 +25,11 @@ SprintGPT is an **AI-powered sprint retrospective engine** built on Atlassian Fo
 1. **Analyzes sprint metrics** with health scores and velocity tracking
 2. **Detects patterns** across multiple sprints automatically
 3. **Generates insights** for more effective retrospectives
-4. **Creates reports** in Confluence with one click
+4. **Creates reports** in Confluence (Experimental)
 5. **Automates triggers** on sprint completion
 
 ---
+
 
 ## 2. Problem Statement
 
@@ -44,7 +59,7 @@ Sprint retrospectives often fail to deliver value. Teams struggle with:
 | **Sprint Dashboard** | Real-time metrics with health score (0-100) | `static/dashboard/src/App.js` |
 | **Rovo AI Agent** | Natural language sprint analysis chat | `manifest.yml` (rovo:agent) |
 | **Pattern Detection** | Identifies trends across sprints | `src/index.js` |
-| **Confluence Reports** | One-click ADF report generation | `insertReportHandler` |
+| **Confluence Reports** | Report generation (Experimental) | `insertReportHandler` |
 | **Sprint Trigger** | Auto-analysis on sprint completion | `onSprintCompleteHandler` |
 
 ---
