@@ -129,12 +129,16 @@ rovo:agent:
 ## 5. Screenshots
 
 **Sprint Intelligence Dashboard:**
-![Sprint Dashboard](static/dashboard_screenshot.png)
+![Sprint Dashboard](static/screenshot_dashboard.png)
 
-**Confluence Page Created from Jira:**
-![Confluence Report](static/confluence_screenshot.png)
+**One-Click Confluence Page Creation:**
+![Confluence Modal](static/screenshot_modal.png)
 
-*One-click "Create Confluence Page" generates a professional retrospective page with metrics, discussion topics, and action items.*
+**Confluence Report Page:**
+![Confluence Page](static/screenshot_confluence_page.png)
+
+**Insert Sprint Report Action:**
+![Confluence Action](static/screenshot_confluence_action.png)
 
 ---
 
@@ -237,7 +241,7 @@ Our health score uses a weighted calculation:
 
 ### Option 1: One-Click Install (For Judges)
 
-👉 **[Install SprintGPT](https://developer.atlassian.com/console/install/045c5e5c-6494-448c-a173-f08478bc6e01?signature=AYABePlb6mFSBcfFJ42BYVw%2FCWEAAAADAAdhd3Mta21zAEthcm46YXdzOmttczp1cy13ZXN0LTI6NzA5NTg3ODM1MjQzOmtleS83MDVlZDY3MC1mNTdjLTQxYjUtOWY5Yi1lM2YyZGNjMTQ2ZTcAuAECAQB4IOp8r3eKNYw8z2v%2FEq3%2FfvrZguoGsXpNSaDveR%2FF%2Fo0BiJCuH0In%2B8TbOLBqGB4u7wAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO2vblZrrz3sXXnx4gIBEIA74GuceZs1Ezi9RAAP17AQ3tQfyx50BL0Z3Ydl6lhaKca0pORs55cdD4HjreTRbk9zNvSBCbWygcOtULQAB2F3cy1rbXMAS2Fybjphd3M6a21zOmV1LXdlc3QtMTo3MDk1ODc4MzUyNDM6a2V5LzQ2MzBjZTZiLTAwYzMtNGRlMi04NzdiLTYyN2UyMDYwZTVjYwC4AQICAHijmwVTMt6Oj3F%2B0%2B0cVrojrS8yZ9ktpdfDxqPMSIkvHAEo8xkrV74ZKe7RAt%2FowrtxAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMerPM2feesrStslhXAgEQgDv2UCZ6028USGmvqq%2F2B3PyMq0WSkJy7BkmXbRgP38CrBOeRGUniXHpVYLJ8W3zPXbES70KveM0SNEDUAAHYXdzLWttcwBLYXJuOmF3czprbXM6dXMtZWFzdC0xOjcwOTU4NzgzNTI0MzprZXkvNmMxMjBiYTAtNGNkNS00OTg1LWI4MmUtNDBhMDQ5NTJjYzU3ALgBAgIAeLKa7Dfn9BgbXaQmJGrkKztjV4vrreTkqr7wGwhqIYs5AVdbPkRglFq7VUJk2WSdi%2BoAAAB%2BMHwGCSqGSIb3DQEHBqBvMG0CAQAwaAYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAxNK7KyHYHD6kdxidcCARCAO%2BuHpl%2BtqLAyIQFfQCL5hyNeFe3WzUehGHDPx%2F0Sy5Vqu7io9NRgcdARwK5u2y7Bvc2%2F4GHVX%2F5tuJCdAgAAAAAMAAAQAAAAAAAAAAAAAAAAAK44nqz6gTukVqrFkD3m2aH%2F%2F%2F%2F%2FAAAAAQAAAAAAAAAAAAAAAQAAADLdrbD2T%2FRj9m7Gb2vQZuRw6IFi4ZFTjs2kb1hZUEzB1IX2tuZqsKRfULqNJQhMuqoywge5h0EaXV%2F3yUnhriu2b0M%3D&product=confluence&product=jira)**
+👉 **[Install SprintGPT](https://developer.atlassian.com/console/install/045c5e5c-6494-448c-a173-f08478bc6e01?signature=AYABeCO3ZBAR2fJB%2FrLYR1LSqa8AAAADAAdhd3Mta21zAEthcm46YXdzOmttczp1cy13ZXN0LTI6NzA5NTg3ODM1MjQzOmtleS83MDVlZDY3MC1mNTdjLTQxYjUtOWY5Yi1lM2YyZGNjMTQ2ZTcAuAECAQB4IOp8r3eKNYw8z2v%2FEq3%2FfvrZguoGsXpNSaDveR%2FF%2Fo0BtV%2FfigLRmf%2Fl08C0I6xCqgAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDKtAEKRgdwrceOmOIgIBEIA741wYBUvrLpqwZUesjIyVorQrpS0zveit%2B%2F9hydsQLVWJMr2BEesaKZREURsjCqjakSHqPm2AzbFgFQ8AB2F3cy1rbXMAS2Fybjphd3M6a21zOmV1LXdlc3QtMTo3MDk1ODc4MzUyNDM6a2V5LzQ2MzBjZTZiLTAwYzMtNGRlMi04NzdiLTYyN2UyMDYwZTVjYwC4AQICAHijmwVTMt6Oj3F%2B0%2B0cVrojrS8yZ9ktpdfDxqPMSIkvHAHkTfJwtmiFX0tzWewIWW1kAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM0OquKUfxFfVth1zsAgEQgDvHeS4qKIKaf%2FgWlZ3AIi5eNVI1lZ4r%2FocQ7QYoHUj%2BMaDIM5%2BfJejRD%2BcSkouKYOxNMXyfiozoyF6wtQAHYXdzLWttcwBLYXJuOmF3czprbXM6dXMtZWFzdC0xOjcwOTU4NzgzNTI0MzprZXkvNmMxMjBiYTAtNGNkNS00OTg1LWI4MmUtNDBhMDQ5NTJjYzU3ALgBAgIAeLKa7Dfn9BgbXaQmJGrkKztjV4vrreTkqr7wGwhqIYs5Aecpm%2BSVcCC%2B6kUuxGBjBvgAAAB%2BMHwGCSqGSIb3DQEHBqBvMG0CAQAwaAYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAz9DSsrv41V2CnUqWICARCAO%2FAUSlOMbxk34Ycfwv29SI8BoNHa3F3gNziveCljDNHC3Z0EpGji3whw3FALL662EP1NJ1GOXSrvo9IeAgAAAAAMAAAQAAAAAAAAAAAAAAAAAFO333g23TmchMazdBW5Gqf%2F%2F%2F%2F%2FAAAAAQAAAAAAAAAAAAAAAQAAADKXb%2FgPDpT0RrgTtcoRiKt3MEdil5aUpmD7NHq8pvN924Epr7WnaHQSQWHBAzWTVn80B8hdH%2BneKxRKROhPODneqQ0%3D&product=confluence&product=jira)**
 
 1. Click the link above
 2. Select your Atlassian site
@@ -245,6 +249,8 @@ Our health score uses a weighted calculation:
 4. Go to: **Jira Project → Apps → Sprint Intelligence**
 5. To use Rovo: **Open Rovo Chat → Select "Sprint Engineer"**
 6. To use Confluence: **Open any Page → Actions (...) → Insert Sprint Retro Report**
+
+> **Note:** Installation links have temporary signatures (valid ~7-14 days). If the link expires, use Option 2 below or contact the developer for a fresh link.
 
 ### Option 2: Clone & Deploy (For Developers)
 
@@ -265,9 +271,10 @@ forge register
 
 # 5. Deploy
 forge deploy
+# 6. Install on your Jira AND Confluence sites
+forge install --product jira --site YOUR-SITE.atlassian.net
+forge install --product confluence --site YOUR-SITE.atlassian.net
 
-# 6. Install on your Jira site
-forge install
 
 # 7. Open the app
 # Go to: **Jira Project → Apps → Sprint Intelligence**

@@ -1032,6 +1032,10 @@ resolver.define('createConfluencePage', async (req) => {
     try {
         const { sprintName, healthScore, velocity, completionRate, avgCycleTime, summary } = req.payload || {};
 
+        // Get site URL from context
+        const siteUrl = req.context?.siteUrl || '';
+        console.log('Site URL from context:', siteUrl);
+
         // Get the user's accessible spaces
         const spacesResponse = await api.asUser().requestConfluence(
             route`/wiki/api/v2/spaces?limit=1`,
@@ -1151,10 +1155,11 @@ resolver.define('createConfluencePage', async (req) => {
             const pageData = await createResponse.json();
             console.log('Page created successfully:', pageData.id);
 
-            // Construct the page URL
-            const pageUrl = pageData._links?.webui
-                ? `https://${spacesData.results[0]?.homepageId ? 'aspirantj969.atlassian.net' : 'confluence'}${pageData._links.webui}`
-                : null;
+            // Construct the full page URL using site URL from context
+            const webuiPath = pageData._links?.webui || '';
+            // Use siteUrl from context, append /wiki for Confluence, then the page path
+            const pageUrl = siteUrl && webuiPath ? `${siteUrl}/wiki${webuiPath}` : webuiPath;
+            console.log('Constructed page URL:', pageUrl);
 
             return {
                 success: true,

@@ -444,7 +444,7 @@ function App() {
                                             <input
                                                 type="text"
                                                 readOnly
-                                                value={`https://aspirantj969.atlassian.net/wiki/spaces/${confluenceResult.spaceKey}/pages/${confluenceResult.pageId}`}
+                                                value={confluenceResult.pageUrl || `/wiki/spaces/${confluenceResult.spaceKey}/pages/${confluenceResult.pageId}`}
                                                 onClick={(e) => {
                                                     e.target.select();
                                                     navigator.clipboard.writeText(e.target.value);
