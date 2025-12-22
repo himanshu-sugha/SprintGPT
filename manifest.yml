@@ -156,6 +156,7 @@ resources:
 
 permissions:
   scopes:
+    - read:space:confluence
     - read:page:confluence
     - write:page:confluence
     - write:jira-work

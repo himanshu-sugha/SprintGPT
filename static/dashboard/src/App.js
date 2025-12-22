@@ -10,6 +10,12 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [analyzing, setAnalyzing] = useState(false);
+    const [comparing, setComparing] = useState(false);
+    const [generatingReport, setGeneratingReport] = useState(false);
+    const [comparisonResult, setComparisonResult] = useState(null);
+    const [retroReport, setRetroReport] = useState(null);
+    const [creatingPage, setCreatingPage] = useState(false);
+    const [confluenceResult, setConfluenceResult] = useState(null);
 
     // Fetch dashboard data
     const fetchData = useCallback(async () => {
@@ -44,6 +50,104 @@ function App() {
             setError(err.message);
         } finally {
             setAnalyzing(false);
+        }
+    };
+
+    // Compare sprints handler - uses local sprint history data
+    const handleCompareSprints = async () => {
+        try {
+            setComparing(true);
+            const sprintHistory = data?.sprintHistory || [];
+            if (sprintHistory.length >= 2) {
+                // Compare the two most recent sprints using local data
+                const sprint1 = sprintHistory[1]; // Older sprint
+                const sprint2 = sprintHistory[0]; // Newer sprint
+
+                const velocityChange = sprint1.velocity > 0
+                    ? (((sprint2.velocity - sprint1.velocity) / sprint1.velocity) * 100).toFixed(1)
+                    : 'N/A';
+                const completionChange = (parseFloat(sprint2.completionRate) - parseFloat(sprint1.completionRate)).toFixed(1);
+
+                const comparisonData = {
+                    sprint1: sprint1,
+                    sprint2: sprint2,
+                    changes: {
+                        velocityChange,
+                        completionRateChange: completionChange
+                    }
+                };
+
+                setComparisonResult(comparisonData);
+                alert(`📊 Sprint Comparison\n\n` +
+                    `${sprint1.sprintName} → ${sprint2.sprintName}\n\n` +
+                    `Velocity: ${sprint1.velocity} → ${sprint2.velocity} pts (${velocityChange}%)\n` +
+                    `Completion Rate: ${sprint1.completionRate}% → ${sprint2.completionRate}% (${completionChange > 0 ? '+' : ''}${completionChange}%)\n` +
+                    `Cycle Time: ${sprint1.avgCycleTime}d → ${sprint2.avgCycleTime}d`);
+            } else {
+                alert('Analyze at least 2 sprints to enable comparison. Click "Analyze Current Sprint" multiple times or "Load Demo Data" first.');
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setComparing(false);
+        }
+    };
+
+    // Generate Confluence report handler - uses actual sprint data from dashboard
+    const handleGenerateReport = () => {
+        const sprint = data?.latestSprint;
+        if (!sprint) {
+            // Set error message that will be shown in UI
+            setError('No sprint data available. Click "Analyze Current Sprint" first.');
+            return;
+        }
+
+        // Generate report using actual dashboard data
+        const healthScore = sprint.healthScore || 0;
+        let summary = 'Sprint retrospective analysis.';
+        if (healthScore >= 80) {
+            summary = 'Excellent sprint! The team performed above expectations.';
+        } else if (healthScore >= 60) {
+            summary = 'Good sprint with room for improvement.';
+        } else {
+            summary = 'Challenging sprint. Focus on blockers and scope management.';
+        }
+
+        const report = {
+            title: `Sprint Retrospective: ${sprint.sprintName}`,
+            healthScore: healthScore,
+            summary: summary,
+            velocity: sprint.velocity,
+            completionRate: sprint.completionRate,
+            avgCycleTime: sprint.avgCycleTime
+        };
+
+        // Set the report - this will trigger the modal to display
+        setRetroReport(report);
+    };
+
+    // Create a Confluence page with the sprint report
+    const handleCreateConfluencePage = async () => {
+        if (!retroReport) return;
+
+        try {
+            setCreatingPage(true);
+            setConfluenceResult(null);
+
+            const result = await invoke('createConfluencePage', {
+                sprintName: retroReport.title.replace('Sprint Retrospective: ', ''),
+                healthScore: retroReport.healthScore,
+                velocity: retroReport.velocity,
+                completionRate: retroReport.completionRate,
+                avgCycleTime: retroReport.avgCycleTime,
+                summary: retroReport.summary
+            });
+
+            setConfluenceResult(result);
+        } catch (err) {
+            setConfluenceResult({ success: false, message: err.message });
+        } finally {
+            setCreatingPage(false);
         }
     };
 
@@ -118,13 +222,20 @@ function App() {
             {/* Header */}
             <div className="dashboard-header">
                 <h1>🏎️ Sprint Intelligence</h1>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                     <button
                         className="action-button"
                         onClick={handleAnalyzeSprint}
                         disabled={analyzing}
                     >
                         {analyzing ? '⏳ Analyzing...' : '📊 Analyze Current Sprint'}
+                    </button>
+                    <button
+                        className="action-button"
+                        onClick={handleGenerateReport}
+                        style={{ background: 'linear-gradient(135deg, #00875A 0%, #006644 100%)' }}
+                    >
+                        📝 Generate Confluence Report
                     </button>
                     <button
                         className="action-button"
@@ -249,6 +360,160 @@ function App() {
             <div style={{ textAlign: 'center', marginTop: '24px', color: '#6B778C', fontSize: '12px' }}>
                 SprintGPT - AI Sprint Retrospective Engine 🏎️ | Codegeist 2025
             </div>
+
+            {/* Report Modal - shown when retroReport is set */}
+            {retroReport && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 100%)',
+                        borderRadius: '16px',
+                        padding: '32px',
+                        maxWidth: '500px',
+                        width: '90%',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                        <h2 style={{ color: '#00C853', marginTop: 0, fontSize: '24px' }}>
+                            📝 Retrospective Report Generated!
+                        </h2>
+                        <div style={{ color: '#fff', marginBottom: '16px' }}>
+                            <h3 style={{ color: '#FFD700', marginBottom: '8px' }}>🏎️ {retroReport.title}</h3>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '8px' }}>
+                                    <div style={{ color: '#6B778C', fontSize: '12px' }}>Health Score</div>
+                                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: retroReport.healthScore >= 70 ? '#00C853' : '#FF6B6B' }}>
+                                        {retroReport.healthScore}
+                                    </div>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '8px' }}>
+                                    <div style={{ color: '#6B778C', fontSize: '12px' }}>Velocity</div>
+                                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{retroReport.velocity} pts</div>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '8px' }}>
+                                    <div style={{ color: '#6B778C', fontSize: '12px' }}>Completion Rate</div>
+                                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{retroReport.completionRate}%</div>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '8px' }}>
+                                    <div style={{ color: '#6B778C', fontSize: '12px' }}>Avg Cycle Time</div>
+                                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{retroReport.avgCycleTime}d</div>
+                                </div>
+                            </div>
+
+                            <p style={{ color: '#B8C4CE', fontStyle: 'italic', marginBottom: '16px' }}>
+                                {retroReport.summary}
+                            </p>
+
+                            <p style={{ color: '#6B778C', fontSize: '12px', marginBottom: '20px' }}>
+                                💡 Click below to create a Confluence page with this report!
+                            </p>
+
+                            {/* Confluence Result Message */}
+                            {confluenceResult && (
+                                <div style={{
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    marginBottom: '16px',
+                                    background: confluenceResult.success ? 'rgba(0,200,83,0.2)' : 'rgba(255,107,107,0.2)',
+                                    border: `1px solid ${confluenceResult.success ? '#00C853' : '#FF6B6B'}`
+                                }}>
+                                    <p style={{ margin: 0, color: confluenceResult.success ? '#00C853' : '#FF6B6B', fontWeight: 'bold' }}>
+                                        {confluenceResult.success ? '✅ ' : '❌ '}{confluenceResult.message}
+                                    </p>
+                                    {confluenceResult.success && confluenceResult.pageTitle && (
+                                        <p style={{ margin: '8px 0 0 0', color: '#B8C4CE', fontSize: '12px' }}>
+                                            📄 Page: {confluenceResult.pageTitle}
+                                        </p>
+                                    )}
+                                    {confluenceResult.success && confluenceResult.spaceKey && (
+                                        <div style={{ marginTop: '12px' }}>
+                                            <p style={{ margin: '0 0 8px 0', color: '#B8C4CE', fontSize: '12px' }}>
+                                                🔗 Copy this link to view your page:
+                                            </p>
+                                            <input
+                                                type="text"
+                                                readOnly
+                                                value={`https://aspirantj969.atlassian.net/wiki/spaces/${confluenceResult.spaceKey}/pages/${confluenceResult.pageId}`}
+                                                onClick={(e) => {
+                                                    e.target.select();
+                                                    navigator.clipboard.writeText(e.target.value);
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    background: 'rgba(255,255,255,0.1)',
+                                                    border: '1px solid #0052CC',
+                                                    borderRadius: '6px',
+                                                    color: '#fff',
+                                                    fontSize: '11px',
+                                                    cursor: 'pointer'
+                                                }}
+                                                title="Click to copy"
+                                            />
+                                            <p style={{ margin: '4px 0 0 0', color: '#6B778C', fontSize: '10px' }}>
+                                                📋 Click to copy, then paste in browser
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Buttons */}
+                        <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
+                            <button
+                                onClick={handleCreateConfluencePage}
+                                disabled={creatingPage}
+                                style={{
+                                    background: creatingPage
+                                        ? 'rgba(255,255,255,0.1)'
+                                        : 'linear-gradient(135deg, #0052CC 0%, #0747A6 100%)',
+                                    color: '#fff',
+                                    border: 'none',
+                                    padding: '14px 24px',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    cursor: creatingPage ? 'wait' : 'pointer',
+                                    width: '100%'
+                                }}
+                            >
+                                {creatingPage ? '⏳ Creating Page...' : '📝 Create Confluence Page'}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setRetroReport(null);
+                                    setConfluenceResult(null);
+                                }}
+                                style={{
+                                    background: 'linear-gradient(135deg, #DE350B 0%, #BF2600 100%)',
+                                    color: '#fff',
+                                    border: 'none',
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    width: '100%'
+                                }}
+                            >
+                                ✕ Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

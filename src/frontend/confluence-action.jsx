@@ -40,6 +40,7 @@ const App = () => {
 
     const handleInsertToPage = async () => {
         setInserting(true);
+        setError(null);
         try {
             // Get context to pass content ID
             const context = await view.getContext();
@@ -53,7 +54,9 @@ const App = () => {
             console.log('Resolved contentId:', contentId);
 
             if (!contentId) {
-                console.error('No contentId found in context!');
+                setError('Could not find page ID. Please try from a Confluence page.');
+                setInserting(false);
+                return;
             }
 
             const response = await invoke('insertReportHandler', {
@@ -64,9 +67,12 @@ const App = () => {
 
             if (response.inserted) {
                 setInserted(true);
+            } else if (response.message) {
+                setError(response.message);
             }
         } catch (err) {
             console.error('Insert error:', err);
+            setError(err.message || 'Failed to insert report');
         } finally {
             setInserting(false);
         }

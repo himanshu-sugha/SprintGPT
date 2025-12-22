@@ -15,7 +15,7 @@ SprintGPT is an **AI-powered sprint retrospective engine** built on Atlassian Fo
 1. **Analyzes sprint metrics** with health scores and velocity tracking
 2. **Detects patterns** across multiple sprints automatically
 3. **Generates insights** for more effective retrospectives
-4. **Creates reports** in Confluence (Experimental)
+4. **Creates Confluence pages** with one click from Jira
 5. **Automates triggers** on sprint completion
 
 ---
@@ -48,7 +48,7 @@ Sprint retrospectives often fail to deliver value. Teams struggle with:
 | **Sprint Dashboard** | Real-time metrics with health score (0-100) | `static/dashboard/src/App.js` |
 | **Rovo AI Agent** | Natural language sprint analysis chat | `manifest.yml` (rovo:agent) |
 | **Pattern Detection** | Identifies trends across sprints | `src/index.js` |
-| **Confluence Reports** | Report generation (Experimental) | `insertReportHandler` |
+| **Confluence Integration** | Creates formatted retro pages in Confluence | `createConfluencePage` |
 | **Sprint Trigger** | Auto-analysis on sprint completion | `onSprintCompleteHandler` |
 
 ---
@@ -131,8 +131,10 @@ rovo:agent:
 **Sprint Intelligence Dashboard:**
 ![Sprint Dashboard](static/dashboard_screenshot.png)
 
-**Confluence Report Generator:**
+**Confluence Page Created from Jira:**
 ![Confluence Report](static/confluence_screenshot.png)
+
+*One-click "Create Confluence Page" generates a professional retrospective page with metrics, discussion topics, and action items.*
 
 ---
 
@@ -175,8 +177,9 @@ Our health score uses a weighted calculation:
 |  4. DETECT PATTERNS                                         |
 |  --> AI identifies trends across your sprint history        |
 +-------------------------------------------------------------+
-|  5. GENERATE REPORT                                         |
-|  --> Create Confluence retro report with one click          |
+|  5. CREATE CONFLUENCE PAGE                                  |
+|  --> "Create Confluence Page" button publishes formatted    |
+|      retrospective directly to your Confluence space        |
 +-------------------------------------------------------------+
 ```
 
