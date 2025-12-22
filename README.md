@@ -6,6 +6,8 @@
 - **Apps for Software Teams** - Helps development teams operate like a pit crew with data-driven retrospectives
 - **Best Rovo Apps** - Uses `rovo:agent` and `action` modules to enable natural language sprint analysis
 
+> **⚠️ Important:** SprintGPT works with **Scrum projects with active sprints**. For Kanban-only projects, demo data is displayed to showcase features.
+
 ---
 
 ## 1. What is SprintGPT?
@@ -140,6 +142,7 @@ rovo:agent:
 **Insert Sprint Report Action:**
 ![Confluence Action](static/screenshot_confluence_action.png)
 
+
 ---
 
 ## 6. Sprint Health Algorithm
@@ -237,7 +240,18 @@ Our health score uses a weighted calculation:
 
 ---
 
-## 11. Quick Start
+## 11. Requirements
+
+SprintGPT works best with:
+- **Scrum projects** with active or recently closed sprints
+- **Team-managed projects** with Agile boards
+- Sprints containing issues with status tracking
+
+> **Note:** For Kanban-only projects without sprints, demo data will be displayed to showcase the dashboard features.
+
+---
+
+## 12. Quick Start
 
 ### Option 1: One-Click Install (For Judges)
 
@@ -249,6 +263,8 @@ Our health score uses a weighted calculation:
 4. Go to: **Jira Project → Apps → Sprint Intelligence**
 5. To use Rovo: **Open Rovo Chat → Select "Sprint Engineer"**
 6. To use Confluence: **Open any Page → Actions (...) → Insert Sprint Retro Report**
+
+> **💡 Tip:** For best results, use a **Scrum project with an active sprint**. Click "Analyze Current Sprint" to fetch real data. Kanban-only projects will display demo data.
 
 > **Note:** Installation links have temporary signatures (valid ~7-14 days). If the link expires, use Option 2 below or contact the developer for a fresh link.
 
@@ -311,7 +327,17 @@ SprintGPT/
 
 ---
 
-## 13. Author
+## 13. Additional Screenshots
+
+**Real Sprint Data Analysis (External Site):**
+![Real Data](static/screenshot_real_data.png)
+
+**Sprint Backlog with Issues:**
+![Sprint Backlog](static/screenshot_sprint_backlog.png)
+
+---
+
+## 14. Author
 
 **Himanshu Sugha**  
 Email: himanshusugha@gmail.com  
